@@ -12,8 +12,11 @@
           <button v-for="(category, index) in uniqueCategories" 
                   :key="index" 
                   @click="activeTab = index"
+                  @keydown.space.prevent="activeTab = index"
                   :class="{ active: activeTab === index }"
-                  class="tab-button">
+                  class="tab-button"
+                  tabindex="0"
+                  aria-label="Tab for {{ category }}">
             {{ category }}
           </button>
         </div>
@@ -30,7 +33,7 @@
           </h3>
           <ul>
             <li v-for="(resource, resourceIndex) in getWebsiteResourcesForCategory(category)" :key="resourceIndex">
-              <a :href="resource.url" target="_blank" rel="noopener noreferrer" class="resource-link main-banner-color">{{ resource.name }}</a>
+              <a :href="resource.url" target="_blank" rel="noopener noreferrer" class="resource-link main-banner-color" tabindex="0" aria-label="Link to {{ resource.name }}" @keydown.space.prevent="openLink(resource.url)">{{ resource.name }}</a>
               <p class="resource-description">{{ resource.description }}</p>
             </li>
           </ul>
@@ -42,7 +45,7 @@
           </h3>
           <ul>
             <li v-for="(server, serverIndex) in getDiscordServersForCategory(category)" :key="serverIndex">
-              <a :href="server.invite_link" target="_blank" rel="noopener noreferrer" class="resource-link main-banner-color">{{ server.name }}</a>
+              <a :href="server.invite_link" target="_blank" rel="noopener noreferrer" class="resource-link main-banner-color" tabindex="0" aria-label="Link to {{ server.name }}" @keydown.space.prevent="openLink(server.invite_link)">{{ server.name }}</a>
               <p class="resource-description">{{ server.description }}</p>
             </li>
           </ul>
@@ -59,12 +62,12 @@
       </div>
     </div>
     <div v-else>
-      <button @click="togglePrivacyPolicy" class="back-button">Back to Support Resources</button>
+      <button @click="togglePrivacyPolicy" @keydown.space.prevent="togglePrivacyPolicy" class="back-button" tabindex="0" aria-label="Back to Support Resources">Back to Support Resources</button>
       <PrivacyPolicyComponent />
     </div>
     <footer class="footer">
-      <button @click="toggleTheme" class="theme-button main-banner-color">Change Theme</button>
-      <button @click="togglePrivacyPolicy" class="privacy-link main-banner-color">Privacy Policy</button>
+      <button @click="toggleTheme" @keydown.space.prevent="toggleTheme" class="theme-button main-banner-color" tabindex="0" aria-label="Change Theme">Change Theme</button>
+      <button @click="togglePrivacyPolicy" @keydown.space.prevent="togglePrivacyPolicy" class="privacy-link main-banner-color" tabindex="0" aria-label="Privacy Policy">Privacy Policy</button>
     </footer>
   </div>
 </template>
@@ -152,6 +155,11 @@ export default {
         this.currentTheme = 'dark-theme';
       }
       document.body.className = this.currentTheme;
+    },
+    openLink(url) {
+      if (window && window.open) {
+        window.open(url, '_blank');
+      }
     }
   }
 }

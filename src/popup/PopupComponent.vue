@@ -5,7 +5,7 @@
 
       <div class="count-container">
       <transition name="slide-fade">
-        <p v-if="showCount" class="count-text"> ~ Day {{ count }} ~</p>
+        <p v-if="showCount" class="count-text" aria-live="polite"> ~ Day {{ count }} ~</p>
       </transition>
     </div>
       <div class="quote-container">
@@ -16,7 +16,7 @@
       </div>
     </div>
     <div class="ellipsis-container">
-      <button @click.stop="toggleCountControls" class="count-button">
+      <button @click.stop="toggleCountControls" class="count-button" aria-expanded="false" aria-controls="count-controls">
         <template v-if="showCountControls">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" :stroke="currentTheme === 'light-theme' ? '#333333' : '#ffffff'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -28,20 +28,20 @@
         </template>
       </button>
       <transition name="fade">
-        <div v-if="showCountControls" class="count-controls" @click.stop>
-          <button @click="resetCount" class="reset-button">Restart streak</button>
+        <div v-if="showCountControls" class="count-controls" @click.stop id="count-controls">
+          <button @click="openResetStreakModal" class="reset-button">Restart streak</button>
           <button @click="openSetStreakModal" class="set-streak-button">Set streak day</button>
         </div>
       </transition>
     </div>
-    <div class="support-icon" @click="goToOptions" title="Online Support Guides">
+    <div class="support-icon" @click="goToOptions" @keydown.space.prevent="goToOptions" title="Online Support Guides" aria-label="Online Support Guides" tabindex="0">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
         <line x1="12" y1="17" x2="12.01" y2="17"></line>
       </svg>
     </div>
-    <div class="theme-switcher" @click="toggleTheme" title="Toggle Theme">
+    <div class="theme-switcher" @click="toggleTheme" @keydown.space.prevent="toggleTheme" title="Toggle Theme" aria-label="Toggle Theme" tabindex="0">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="5"></circle>
         <line x1="12" y1="1" x2="12" y2="3"></line>
@@ -55,13 +55,24 @@
       </svg>
     </div>
     <transition name="fade">
-      <div v-if="showSetStreakModal" class="modal-overlay" @click="closeSetStreakModal">
+      <div v-if="showSetStreakModal" class="modal-overlay" @click="closeSetStreakModal" aria-modal="true" role="dialog" tabindex="0">
         <div class="modal" @click.stop>
           <h2>Set Streak Day</h2>
-          <input v-model="newStreakDay" type="number" min="1" class="streak-input">
+          <input v-model="newStreakDay" type="number" min="1" class="streak-input" aria-label="Set Streak Day">
           <div class="modal-buttons">
-            <button @click="closeSetStreakModal" class="close-button">X</button>
-            <button @click="setStreakDay" class="accept-button">✓</button>
+            <button @click="closeSetStreakModal" class="close-button" aria-label="Close" tabindex="0">X</button>
+            <button @click="setStreakDay" class="accept-button" aria-label="Accept" tabindex="0">✓</button>
+          </div>
+        </div>
+      </div>
+    </transition>
+    <transition name="fade">
+      <div v-if="showResetStreakModal" class="modal-overlay" @click="closeResetStreakModal" aria-modal="true" role="dialog" tabindex="0">
+        <div class="modal" @click.stop>
+          <h3>Do you really want to reset your streak?</h3>
+          <div class="modal-buttons">
+            <button @click="closeResetStreakModal" class="close-button" aria-label="No" tabindex="0">No</button>
+            <button @click="confirmResetStreak" class="accept-button" aria-label="Yes" tabindex="0">Yes</button>
           </div>
         </div>
       </div>
@@ -97,6 +108,7 @@ export default {
       currentTheme: 'dark-theme', // Default theme
       themes: ['dark-theme', 'light-theme', 'ocean-theme', 'forest-theme'], // Available themes
       showSetStreakModal: false,
+      showResetStreakModal: false,
       newStreakDay: 1
     }
   },
@@ -214,6 +226,16 @@ export default {
       this.count = parseInt(this.newStreakDay);
       localStorage.setItem('count', this.count.toString());
       this.closeSetStreakModal();
+    },
+    openResetStreakModal() {
+      this.showResetStreakModal = true;
+    },
+    closeResetStreakModal() {
+      this.showResetStreakModal = false;
+    },
+    confirmResetStreak() {
+      this.resetCount();
+      this.closeResetStreakModal();
     }
   }
 }
