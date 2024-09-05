@@ -1,0 +1,172 @@
+/* Dark Theme (Default) */
+.dark-theme {
+    --bg-color: #1a1a1a;
+    --text-color: #ffffff;
+    --accent-color: #ff4500;
+    --accent-light: #ff6a33;
+    --accent-dark: #cc3700;
+    --quote-bubble-bg: #222222;
+    --count-controls-bg: #333333;
+    --count-controls-hover: #444444;
+    --options-bg: #2a2a2a;
+    --options-border: #3a3a3a;
+    --options-hover: #3f3f3f;
+    --tab-bg: #333333;
+    --tab-text: #ffffff;
+    --tab-active-bg: #ff4500;
+    --tab-active-text: #ffffff;
+    --privacy-policy-bg: #111111;
+    --privacy-policy-heading: #4a90e2;
+}
+
+/* Light Theme */
+.light-theme {
+    --bg-color: #f5f5f5;
+    --text-color: #333333;
+    --accent-color: #ff4500;
+    --accent-light: #ff6a33;
+    --accent-dark: #cc3700;
+    --quote-bubble-bg: #ffffff;
+    --count-controls-bg: #e0e0e0;
+    --count-controls-hover: #d0d0d0;
+    --options-bg: #ffffff;
+    --options-border: #e0e0e0;
+    --options-hover: #f0f0f0;
+    --tab-bg: #e0e0e0;
+    --tab-text: #333333;
+    --tab-active-bg: #ff4500;
+    --tab-active-text: #ffffff;
+    --privacy-policy-bg: #ffffff;
+    --privacy-policy-heading: #ff4500;
+}
+
+/* Ocean Theme */
+.ocean-theme {
+    --bg-color: #1a3a4a;
+    --text-color: #e0f0ff;
+    --accent-color: #00b4d8;
+    --accent-light: #48cae4;
+    --accent-dark: #0077b6;
+    --quote-bubble-bg: #2a4a5a;
+    --count-controls-bg: #3a5a6a;
+    --count-controls-hover: #4a6a7a;
+    --options-bg: #2a4a5a;
+    --options-border: #3a5a6a;
+    --options-hover: #3a5a6a;
+    --tab-bg: #3a5a6a;
+    --tab-text: #e0f0ff;
+    --tab-active-bg: #00b4d8;
+    --tab-active-text: #ffffff;
+    --privacy-policy-bg: #0a2a3a;
+    --privacy-policy-heading: #48cae4;
+}
+
+/* Forest Theme */
+.forest-theme {
+    --bg-color: #1b2a1b;
+    --text-color: #e8f5e8;
+    --accent-color: #4caf50;
+    --accent-light: #66bb6a;
+    --accent-dark: #388e3c;
+    --quote-bubble-bg: #2b3a2b;
+    --count-controls-bg: #3b4a3b;
+    --count-controls-hover: #4b5a4b;
+    --options-bg: #2b3a2b;
+    --options-border: #3b4a3b;
+    --options-hover: #3b4a3b;
+    --tab-bg: #3b4a3b;
+    --tab-text: #e8f5e8;
+    --tab-active-bg: #4caf50;
+    --tab-active-text: #ffffff;
+    --privacy-policy-bg: #0b1a0b;
+    --privacy-policy-heading: #66bb6a;
+}
+
+/* Apply theme variables */
+.popup {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.options {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.banner {
+    color: var(--accent-color);
+}
+
+.border-line {
+    background-color: var(--accent-color);
+}
+
+.quote-bubble {
+    background-color: var(--quote-bubble-bg);
+}
+
+.quote-bubble::after {
+    border-color: var(--quote-bubble-bg) transparent;
+}
+
+.count-controls {
+    background-color: var(--count-controls-bg);
+}
+
+.count-controls button:hover {
+    background-color: var(--count-controls-hover);
+}
+
+.count-button:hover {
+    background-color: var(--count-controls-bg);
+}
+
+.support-icon svg {
+    color: var(--text-color);
+}
+
+/* Options Component Styles */
+.options-container {
+    background-color: var(--options-bg);
+    border-color: var(--options-border);
+}
+
+.option-item:hover {
+    background-color: var(--options-hover);
+}
+
+.option-item.selected {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+.save-button {
+    background-color: var(--accent-color);
+    color: var(--bg-color);
+}
+
+.save-button:hover {
+    background-color: var(--accent-light);
+}
+
+/* Tab Styles */
+.tab-button {
+    background-color: var(--tab-bg);
+    color: var(--tab-text);
+}
+
+.tab-button.active {
+    background-color: var(--tab-active-bg);
+    color: var(--tab-active-text);
+}
+
+/* Privacy Policy Component Styles */
+.privacy-policy {
+    background-color: var(--privacy-policy-bg);
+    color: var(--text-color);
+}
+
+.privacy-policy h1,
+.privacy-policy h2 {
+    color: var(--privacy-policy-heading);
+}
