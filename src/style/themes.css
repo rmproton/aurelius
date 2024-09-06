@@ -17,6 +17,11 @@
     --tab-active-text: #ffffff;
     --privacy-policy-bg: #111111;
     --privacy-policy-heading: #4a90e2;
+    --starting-bg: #1a1a1a;
+    --starting-text: #ffffff;
+    --starting-button-bg: #ff4500;
+    --starting-button-text: #ffffff;
+    --starting-button-hover: #ff6a33;
 }
 
 /* Light Theme */
@@ -38,6 +43,11 @@
     --tab-active-text: #ffffff;
     --privacy-policy-bg: #ffffff;
     --privacy-policy-heading: #ff4500;
+    --starting-bg: #f5f5f5;
+    --starting-text: #333333;
+    --starting-button-bg: #ff4500;
+    --starting-button-text: #ffffff;
+    --starting-button-hover: #ff6a33;
 }
 
 /* Ocean Theme */
@@ -59,6 +69,11 @@
     --tab-active-text: #ffffff;
     --privacy-policy-bg: #0a2a3a;
     --privacy-policy-heading: #48cae4;
+    --starting-bg: #1a3a4a;
+    --starting-text: #e0f0ff;
+    --starting-button-bg: #00b4d8;
+    --starting-button-text: #ffffff;
+    --starting-button-hover: #48cae4;
 }
 
 /* Forest Theme */
@@ -80,6 +95,11 @@
     --tab-active-text: #ffffff;
     --privacy-policy-bg: #0b1a0b;
     --privacy-policy-heading: #66bb6a;
+    --starting-bg: #1b2a1b;
+    --starting-text: #e8f5e8;
+    --starting-button-bg: #4caf50;
+    --starting-button-text: #ffffff;
+    --starting-button-hover: #66bb6a;
 }
 
 /* Apply theme variables */
@@ -169,4 +189,19 @@
 .privacy-policy h1,
 .privacy-policy h2 {
     color: var(--privacy-policy-heading);
+}
+
+/* Starting Component Styles */
+.starting-component {
+    background-color: var(--starting-bg);
+    color: var(--starting-text);
+}
+
+.start-button {
+    background-color: var(--starting-button-bg);
+    color: var(--starting-button-text);
+}
+
+.start-button:hover {
+    background-color: var(--starting-button-hover);
 }

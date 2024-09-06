@@ -1,5 +1,11 @@
 <template>
-  <div class="popup" :class="currentTheme" @click="closeCountControls">
+  <div v-if="!hasStartedJourney">
+    <StartingComponent @start-journey="startJourney" />
+  </div>
+  <div v-else-if="!hasSelectedAddiction">
+    <SelectionComponent @addiction-selected="onAddictionSelected" />
+  </div>
+  <div v-else class="popup" :class="currentTheme" @click="closeCountControls">
     <h1 class="banner">Aurelius</h1>
      <div class="content">
 
@@ -7,6 +13,7 @@
       <transition name="slide-fade">
         <p v-if="showCount" class="count-text" aria-live="polite"> ~ Day {{ count }} ~</p>
       </transition>
+      <span class="addiction-tag" :style="{ backgroundColor: getAddictionColor() }">{{ selectedAddiction }} addiction</span>
     </div>
       <div class="quote-container">
         <div class="quote-bubble">
@@ -82,11 +89,20 @@
 <script>
 import quotes from '../quotes/quotes.json';
 import './popup.css';
+import StartingComponent from './StartingComponent.vue';
+import SelectionComponent from './SelectionComponent.vue';
 
 export default {
   name: "PopupComponent",
+  components: {
+    StartingComponent,
+    SelectionComponent
+  },
   data() {
     return {
+      hasStartedJourney: false,
+      hasSelectedAddiction: false,
+      selectedAddiction: '',
       quoteText: '',
       quoteAuthor: '',
       count: 0,
@@ -113,15 +129,56 @@ export default {
     }
   },
   created() {
-    this.setDailyQuote();
-    this.loadCount();
-    this.checkLastOpened();
-    this.loadTheme();
-    setTimeout(() => {
-      this.showCount = true;
-    }, 100);
+    this.checkJourneyStarted();
+    if (this.hasStartedJourney && this.hasSelectedAddiction) {
+      this.setDailyQuote();
+      this.loadCount();
+      this.checkLastOpened();
+      this.loadTheme();
+      this.loadSelectedAddiction();
+      setTimeout(() => {
+        this.showCount = true;
+      }, 100);
+    }
   },
   methods: {
+    checkJourneyStarted() {
+      const journeyStarted = localStorage.getItem('journeyStarted');
+      this.hasStartedJourney = journeyStarted === 'true';
+      const addictionSelected = localStorage.getItem('addictionSelected');
+      this.hasSelectedAddiction = addictionSelected === 'true';
+    },
+    startJourney() {
+      this.hasStartedJourney = true;
+      localStorage.setItem('journeyStarted', 'true');
+    },
+    onAddictionSelected(addiction) {
+      this.hasSelectedAddiction = true;
+      this.selectedAddiction = addiction;
+      localStorage.setItem('addictionSelected', 'true');
+      localStorage.setItem('selectedAddiction', addiction);
+      this.setDailyQuote();
+      this.loadCount();
+      this.checkLastOpened();
+      this.loadTheme();
+      setTimeout(() => {
+        this.showCount = true;
+      }, 100);
+    },
+    loadSelectedAddiction() {
+      this.selectedAddiction = localStorage.getItem('selectedAddiction') || '';
+    },
+    getAddictionColor() {
+      const colors = {
+        'Drug': '#4B0082',
+        'Sex': '#FF69B4',
+        'Porn': '#FF1493',
+        'Gambling': '#32CD32',
+        'Alcohol': '#FFA500',
+        'Other': '#A9A9A9'
+      };
+      return colors[this.selectedAddiction] || '#A9A9A9';
+    },
     setDailyQuote() {
       const today = new Date().toISOString().split('T')[0];
       const storedDate = localStorage.getItem('quoteDate');
@@ -146,20 +203,28 @@ export default {
         localStorage.setItem('quoteDate', today);
         localStorage.setItem('dailyQuoteText', this.quoteText);
         localStorage.setItem('dailyQuoteAuthor', this.quoteAuthor);
-        this.incrementCount();
+        if (this.hasSelectedAddiction) {
+          this.incrementCount();
+        }
       }
     },
     loadCount() {
-      const storedCount = localStorage.getItem('count');
-      this.count = storedCount ? parseInt(storedCount) : 0;
+      if (this.hasSelectedAddiction) {
+        const storedCount = localStorage.getItem('count');
+        this.count = storedCount ? parseInt(storedCount) : 0;
+      }
     },
     incrementCount() {
-      this.count++;
-      localStorage.setItem('count', this.count.toString());
+      if (this.hasSelectedAddiction) {
+        this.count++;
+        localStorage.setItem('count', this.count.toString());
+      }
     },
     resetCount() {
-      this.count = 1;
-      localStorage.setItem('count', '1');
+      if (this.hasSelectedAddiction) {
+        this.count = 1;
+        localStorage.setItem('count', '1');
+      }
     },
     toggleCountControls() {
       this.showCountControls = !this.showCountControls;
@@ -168,17 +233,19 @@ export default {
       this.showCountControls = false;
     },
     checkLastOpened() {
-      const today = new Date().toISOString().split('T')[0];
-      this.lastOpenedDate = localStorage.getItem('lastOpenedDate');
-      
-      if (this.lastOpenedDate !== today) {
-        this.showNotification();
+      if (this.hasSelectedAddiction) {
+        const today = new Date().toISOString().split('T')[0];
+        this.lastOpenedDate = localStorage.getItem('lastOpenedDate');
+        
+        if (this.lastOpenedDate !== today) {
+          this.showNotification();
+        }
+        
+        localStorage.setItem('lastOpenedDate', today);
       }
-      
-      localStorage.setItem('lastOpenedDate', today);
     },
     showNotification() {
-      if ('Notification' in window) {
+      if (this.hasSelectedAddiction && 'Notification' in window) {
         Notification.requestPermission().then((permission) => {
           if (permission === 'granted') {
             const motivationIndex = this.count % this.motivations.length;
@@ -223,8 +290,10 @@ export default {
       this.showSetStreakModal = false;
     },
     setStreakDay() {
-      this.count = parseInt(this.newStreakDay);
-      localStorage.setItem('count', this.count.toString());
+      if (this.hasSelectedAddiction) {
+        this.count = parseInt(this.newStreakDay);
+        localStorage.setItem('count', this.count.toString());
+      }
       this.closeSetStreakModal();
     },
     openResetStreakModal() {
@@ -242,4 +311,16 @@ export default {
 </script>
 
 <style>
+.addiction-tag {
+  font-size: 1em;
+  padding: 0.4rem 1rem;
+  border-radius: 10px;
+  color: white; 
+}
+
+.count-text {
+  margin-bottom: 1rem;
+}
+
+
 </style>

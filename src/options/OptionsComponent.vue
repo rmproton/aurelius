@@ -6,7 +6,7 @@
         <button @click="openModal" class="reset-button">Reset Streak</button>
       </div>
       <h1 class="main-banner">Aurelius </h1>
-      <div class="content-container">
+      <div class="content-container" :style="{ backgroundColor: currentTheme === 'light-theme' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.05)' }">
         <h2 class="banner">Support Resources</h2>
         <div class="tabs">
           <button v-for="(category, index) in uniqueCategories" 
