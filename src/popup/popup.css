@@ -87,11 +87,13 @@ h1 {
 .reset-button {
   background-color: var(--text-color) !important;
   color: var(--bg-color) !important;
+  white-space: nowrap;
 }
 
 .set-streak-button {
   background-color: var(--text-color) !important;
   color: var(--bg-color) !important;
+  white-space: nowrap;
 }
 
 .content {
