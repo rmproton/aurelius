@@ -1,7 +1,7 @@
 @import '../style/themes.css';
 
 .popup {
-    width: 350px;
+    width: 260px;
     height: 500px;/* Increased height */
   padding: 1rem 2rem;
   position: relative;
@@ -32,7 +32,7 @@ h1 {
 }
 
 .count-text {
-  margin: 0;
+   
   font-size: 1.3rem;
   font-weight: 400;
 }
@@ -64,9 +64,10 @@ h1 {
 
 .count-controls {
   position: absolute;
-  top: 100%;
+  top: 2.5rem;
   right: 0;
-  padding: 5px;
+  z-index: 99;
+   padding: 5px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
@@ -100,7 +101,7 @@ h1 {
   display: flex;
   flex-direction: column;
   height: calc(100% - 80px); /* Adjust content height */
-  justify-content: center; /* Center content vertically */
+  justify-content: space-around; /* Center content vertically */
 }
 
 .quote-container {
@@ -282,3 +283,28 @@ h1 {
   background-color: var(--text-color) !important;
   color: var(--bg-color) !important;
 }
+
+.addiction-tag {
+    position: relative;
+    font-size: 1em;
+    padding: 0.4rem 1rem;
+    border-radius: 10px;
+    color: white; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+   
+  .count-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 0.5rem;
+  }
+  
+  .addiction-icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.5rem;
+  }

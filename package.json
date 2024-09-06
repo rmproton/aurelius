@@ -12,6 +12,7 @@
         "core-js": "^3.8.3",
         "vue": "^3.2.13",
         "vue-router": "^4.4.3",
+        "vuedraggable": "^2.24.3",
         "vuesax": "^4.0.1-alpha.25"
     },
     "devDependencies": {

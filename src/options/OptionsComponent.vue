@@ -196,7 +196,7 @@ export default {
   position: absolute;
   top: 20px;
   right: 20px;
-  display: flex;
+   display: flex;
   flex-direction: column;
   align-items: flex-end;
 }

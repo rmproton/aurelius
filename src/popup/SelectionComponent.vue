@@ -1,15 +1,21 @@
 <template>
   <div class="starting-component" :class="currentTheme">
-    <h1 class="banner" :class="{ 'banner-expanded': selectedItem }">Aurelius</h1>
+    <button @click="goBackToPopup" class="back-arrow" :class="currentTheme">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="19" y1="12" x2="5" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+    </button>
+    <h1 class="banner" :class="{ 'banner-expanded': selectedItems.length > 0 }">Aurelius</h1>
     <div class="content">
-      <h4 class="centered-text" data-aos="fade-left" v-if="!selectedItem">
-        <span style="font-weight: 400;">Every start is the dawn of success, </span><br/>select what you want to stop:
+      <h4 class="centered-text" data-aos="fade-left" v-if="selectedItems.length === 0">
+        <span style="font-weight: 400;">Every start is the dawn of success, </span><br/>select up to three addictions you want to stop:
       </h4>
       
-      <div v-if="!selectedItem" class="circular-menu">
-        <div class="menu-item" v-for="(item, index) in menuItems" :key="index" @click="selectItem(item)">
-          <div class="icon-container" :class="{ 'expanded': selectedItem === item }" :style="{ backgroundImage: `linear-gradient(135deg, ${item.color}, ${item.colorLight})` }">
-            <svg v-if="item.name === 'Drug'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="24" height="24">
+      <div v-if="selectedItems.length === 0" class="circular-menu">
+        <div v-for="(item, index) in availableMenuItems" :key="index" class="menu-item" @click="selectItem(item)">
+          <div class="icon-container" :class="{ 'expanded': selectedItems.includes(item) }" :style="{ backgroundImage: `linear-gradient(135deg, ${item.color}, ${item.colorLight})` }">
+            <svg v-if="item.name === 'Drugs'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white" width="24" height="24">
               <path d="M0 0h24v24H0z" fill="none"/>
               <path d="M6 3h12v2H6zm11 3H7c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-1 9h-2.5v2.5h-3V15H8v-3h2.5V9.5h3V12H16v3z"/>
             </svg>
@@ -38,33 +44,28 @@
         </div>
       </div>
 
-      <div v-else class="selected-item-container">
+      <div v-else class="selected-items-container">
         <button @click="goBack" class="back-button">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
         </button>
-        <div class="selected-item-content">
-          <div class="icon-container expanded" :style="{ backgroundImage: `linear-gradient(135deg, ${selectedItem.color}, ${selectedItem.colorLight})` }">
-            <div class="selected-category-content">
-              <h2 class="selected-category-name">You have chosen</h2>
-              <div class="selected-icon">
-                <img v-if="selectedItem.name === 'Drug'" src="../assets/icons/drug-icon.svg" alt="Drug Icon" width="80" height="80">
-                <img v-else-if="selectedItem.name === 'Sex'" src="../assets/icons/sex-icon.svg" alt="Sex Icon" width="80" height="80">
-                <img v-else-if="selectedItem.name === 'Porn'" src="../assets/icons/porn-icon.svg" alt="Porn Icon" width="80" height="80">
-                <img v-else-if="selectedItem.name === 'Gambling'" src="../assets/icons/gambling-icon.svg" alt="Gambling Icon" width="80" height="80">
-                <img v-else-if="selectedItem.name === 'Alcohol'" src="../assets/icons/alcohol-icon.svg" alt="Alcohol Icon" width="80" height="80">
-                <img v-else-if="selectedItem.name === 'Other'" src="../assets/icons/other-icon.svg" alt="Other Icon" width="80" height="80">
+        <div class="selected-items-content">
+          <div v-for="(item, index) in selectedItems" :key="index" class="selected-item">
+            <div class="icon-container expanded" :style="{ backgroundImage: `linear-gradient(135deg, ${item.color}, ${item.colorLight})` }">
+              <div class="selected-category-content">
+                <h2 class="selected-category-name">{{ item.name }} Addiction</h2>
+                <div class="selected-icon">
+                  <img :src="getIconSrc(item.name)" :alt="`${item.name} Icon`" width="60" height="60">
+                </div>
               </div>
-              <h2 class="selected-category-name">{{ selectedItem.name }}<br>Addiction</h2>
             </div>
-            
           </div>
         </div>
       </div>
 
-      <button v-if="selectedItem" @click="confirmSelection" class="confirm-button">
+      <button v-if="selectedItems.length > 0" @click="confirmSelection" class="confirm-button">
         Confirm
       </button>
     </div>
@@ -80,15 +81,21 @@ export default {
   data() {
     return {
       currentTheme: 'dark-theme', // Default theme
-      selectedItem: null,
+      selectedItems: [],
       menuItems: [
-        { name: 'Drug', color: '#4B0082', colorLight: '#8A2BE2' },
+        { name: 'Drugs', color: '#4B0082', colorLight: '#8A2BE2' },
         { name: 'Sex', color: '#FF69B4', colorLight: '#FFA6D2' },
         { name: 'Porn', color: '#FF1493', colorLight: '#FF69B4' },
         { name: 'Gambling', color: '#32CD32', colorLight: '#90EE90' },
         { name: 'Alcohol', color: '#FFA500', colorLight: '#FFD700' },
         { name: 'Other', color: '#A9A9A9', colorLight: '#C7C7C7' }
       ]
+    }
+  },
+  computed: {
+    availableMenuItems() {
+      const existingAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
+      return this.menuItems.filter(item => !existingAddictions.some(addiction => addiction.addiction === item.name));
     }
   },
   mounted() {
@@ -100,17 +107,48 @@ export default {
   },
   methods: {
     selectItem(item) {
-      this.selectedItem = item;
+      if (this.selectedItems.includes(item)) {
+        this.selectedItems = this.selectedItems.filter(i => i !== item);
+      } else if (this.selectedItems.length < 3) {
+        this.selectedItems.push(item);
+      } else {
+        // Optionally, you can show a message to the user that they can't add more than 3 items
+        console.log("You can't add more than 3 items.");
+        // Or you could emit an event to show a notification in the parent component
+        // this.$emit('max-items-reached');
+      }
     },
     goBack() {
-      this.selectedItem = null;
+      this.selectedItems = [];
+    },
+    goBackToPopup() {
+        this.$emit('addiction-selected');
     },
     confirmSelection() {
-      if (this.selectedItem) {
-        localStorage.setItem('selectedAddiction', this.selectedItem.name);
-        localStorage.setItem('addictionColor', this.selectedItem.color);
-        localStorage.setItem('addictionColorLight', this.selectedItem.colorLight);
-        this.$emit('addiction-selected', this.selectedItem.name);
+      if (this.selectedItems.length > 0) {
+        const existingAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
+        const newAddictions = this.selectedItems.map((item, index) => ({
+          addiction: item.name,
+          days: 1,
+          addictionColor: item.color,
+          position: index,
+          dateCreated: new Date().toISOString()
+        }));
+        // Ensure the total number of addictions doesn't exceed 3
+        const totalAddictions = existingAddictions.length + newAddictions.length;
+        if (totalAddictions > 3) {
+          const availableSlots = Math.max(0, 3 - existingAddictions.length);
+          newAddictions.splice(availableSlots);
+        }
+        
+        const updatedAddictions = [...existingAddictions, ...newAddictions].slice(0, 3);
+        
+        localStorage.setItem('selectedAddictions', JSON.stringify(updatedAddictions));
+        
+        // Set hasSelectedAddiction to true if at least one addiction is selected
+        localStorage.setItem('hasSelectedAddiction', 'true');
+        
+        this.$emit('addiction-selected');
       }
     },
     loadTheme() {
@@ -118,6 +156,9 @@ export default {
       if (storedTheme) {
         this.currentTheme = storedTheme;
       }
+    },
+    getIconSrc(name) {
+      return `../assets/icons/${name.toLowerCase()}-icon.svg`;
     }
   }
 }
@@ -262,6 +303,7 @@ export default {
   height: 100%;
   z-index: 10;
 }
+
 .selected-category-name {
   color: white;
   font-family: 'Poppins', sans-serif;
@@ -317,5 +359,23 @@ export default {
 .selected-icon img {
   width: 80px;
   height: 80px;
+}
+
+
+.back-arrow {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+  transition: transform 0.3s ease;
+}
+
+.back-arrow:hover {
+  transform: scale(1.1);
 }
 </style>

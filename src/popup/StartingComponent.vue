@@ -5,6 +5,12 @@
       <h2 class="centered-text" data-aos="fade-left">
         Ready to start your journey and fight the urge?
       </h2>
+      <div class="timer-icon" data-aos="fade-left">
+        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+      </div>
       <p class="description-text" data-aos="fade-right">
         Aurelius is a time tracker to help you remember everyday how long you have made it into your recovery
       </p>
