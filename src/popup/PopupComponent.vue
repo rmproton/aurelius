@@ -16,12 +16,7 @@
            :style="{ backgroundColor: addiction.addictionColor, transform: addiction === draggedAddiction ? 'scale(1.05)' : 'none' }"
            :class="{ 'dragging': addiction === draggedAddiction }"
            :data-addiction="addiction.addiction"
-           draggable="true"
-           @dragstart="dragStart($event, addiction)"
-           @dragover.prevent
-           @dragenter.prevent="dragEnter($event, addiction)"
-           @dragleave="dragLeave($event)"
-           @drop="drop($event, addiction)">
+        >
         <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center;">
           <img :src="getAddictionIcon(addiction.addiction)" :alt="`${addiction.addiction} icon`" class="addiction-icon">
           <span style="font-family: 'Poppins', sans-serif;"> {{ addiction.addiction }}</span>
@@ -52,10 +47,9 @@
         </div>
         <transition name="fade">
             <div v-if="showCountControls[addiction.addiction]" class="modal-overlay" @click.self="closeCountControls(addiction.addiction)" aria-modal="true" role="dialog" tabindex="0" style="z-index: 999999;">
+              
               <div class="modal">
-                <div class="modal-header">
-                  <h3 :style="{ color: currentTheme === 'light-theme' ? '#333333' : '#ffffff' }">What do you want to do ?</h3>
-                </div>
+           
                 <div class="addiction-tag" 
                     :style="{ backgroundColor: addiction.addictionColor }"
                     :data-addiction="addiction.addiction">
@@ -64,19 +58,53 @@
                     <span style="font-family: 'Poppins', sans-serif; "> {{ addiction.addiction }}  </span>
                   </div>
                   <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; width: 100%; margin-left: 2rem;">
-                    <div class="count-text" aria-live="polite" style="display: flex; align-items: center;  ">
+                    <div class="count-text" aria-live="polite" style="display: flex; align-items: center; font-size: 0.9rem; ">
                       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
                         <circle cx="12" cy="12" r="10"></circle>
                         <polyline points="12 6 12 12 16 14"></polyline>
                       </svg>
-                      {{ addiction.days }}
-                      {{ addiction.days === 1 ? 'day' : 'days' }} 
+                      {{ formatDuration(new Date() - new Date(addiction.dateCreated)) }}
                     </div>
                   </div>
                 </div>
+                <transition name="fade">
+                  <div v-if="inputStreakVisible[addiction.addiction]" class="set-streak-container" style="margin-top: 1rem;">
+                    <input 
+                      v-model="streakDays"
+                      type="number" 
+                      min="0" 
+                      class="streak-input" 
+                      placeholder="Enter days"
+                      aria-label="Enter number of days for streak"
+                    >
+                    <button 
+                      @click="setStreakDay(addiction.addiction)" 
+                      class="set-streak-button-validate"
+                      :disabled="!streakDays || streakDays < 0"
+                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    </button>
+                    <button 
+                      @click="inputStreakVisible[addiction.addiction] = false" 
+                      class="cancel-streak-button"
+                      aria-label="Cancel setting streak"
+                      style="background-color: #FFB3BA; color: #FFFFFF; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                  </div>
+                </transition>
+
+                
                 <div class="modal-buttons">
                   <button @click="openResetStreakModal(addiction.addiction)" class="reset-button">Restart streak</button>
-                  <button @click="openSetStreakModal(addiction.addiction)" class="set-streak-button">Set streak day</button>
+                  <button @click="showInputStreak(addiction.addiction)" class="set-streak-button">Set streak day</button>
+                  <button @click="openDeleteAddictionModal(addiction.addiction)" class="delete-button">Delete addiction</button>
                 </div>
               </div>
             </div>
@@ -102,12 +130,15 @@
 
     </div>
   
-      <div class="quote-container">
-          <div class="quote-bubble">
+ 
+      <div class="quote-container"    >
+          <div class="quote-bubble" data-aos="fade-bottom" data-aos-duration="800"      data-aos-easing="linear"   >
             <p class="quote-text"> {{ quoteText }} </p>
           </div>
-          <p class="quote-author">- {{ quoteAuthor }}</p>
+          <p class="quote-author" data-aos="fade-left" data-aos-duration="800"      data-aos-easing="linear"  >- {{ quoteAuthor }}</p>
       </div>
+     
+    
     </div>
    
     <div class="support-icon" @click="goToOptions" @keydown.space.prevent="goToOptions" title="Online Support Guides" aria-label="Online Support Guides" tabindex="0">
@@ -137,6 +168,9 @@
 <script>
 import quotes from '../quotes/quotes.json';
 import './popup.css';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+
 import StartingComponent from './StartingComponent.vue';
 import SelectionComponent from './SelectionComponent.vue';
 import drugIcon from '../assets/icons/drugs-icon.svg'
@@ -160,6 +194,8 @@ export default {
       quoteText: '',
       version: '',
       quoteAuthor: '',
+      streakDays: undefined,
+      inputStreakVisible: [],
       count: 0,
       showCountControls: [],
       showCount: false,
@@ -185,6 +221,7 @@ export default {
     }
   },
   mounted(){
+    AOS.init();
     this.fetchVersion(); 
   },
   created() {
@@ -234,6 +271,21 @@ export default {
         this.showCount = true;
       }, 100);
     },
+    openResetStreakModal(addiction) {
+      if (confirm(`Are you sure you want to reset the streak for ${addiction}?`)) {
+        const selectedAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
+        const index = selectedAddictions.findIndex(item => item.addiction === addiction);
+        if (index !== -1) {
+          selectedAddictions[index].dateCreated = new Date().toISOString();
+          localStorage.setItem('selectedAddictions', JSON.stringify(selectedAddictions));
+          this.loadSelectedAddiction(); // Refresh the displayed addictions
+        }
+        this.showCountControls[addiction] = false 
+      }
+    
+    },
+   
+   
     loadSelectedAddiction() {
       const storeAddictions = localStorage.getItem('selectedAddictions');
       this.selectedAddictions = JSON.parse(storeAddictions) || [];
@@ -335,6 +387,22 @@ export default {
         }
       }
     },
+    formatDuration(duration) {
+      const days = Math.floor(duration / (1000 * 60 * 60 * 24));
+      const months = Math.floor(days / 30);
+      const remainingDays = days % 30;
+ 
+      let formattedDuration = '';
+      if (months > 0 && remainingDays > 0) {
+        formattedDuration = `${months}m ${remainingDays}d`;
+      } else if (months > 0) {
+        formattedDuration = `${months}m`;
+      } else {
+        formattedDuration = `${days}d`;
+      }
+  
+      return formattedDuration.trim();
+    },
     loadCount() {
       if (this.hasSelectedAddiction) {
         const storedCount = localStorage.getItem('count');
@@ -415,28 +483,67 @@ export default {
         this.currentTheme = 'dark-theme'; // Default theme if not stored or invalid
       }
     },
-    openSetStreakModal() {
-      this.showSetStreakModal = true;
+    showInputStreak(addiction){
+      this.inputStreakVisible[addiction] = true
     },
-    closeSetStreakModal() {
-      this.showSetStreakModal = false;
-    },
-    setStreakDay() {
-      if (this.hasSelectedAddiction) {
-        this.count = parseInt(this.newStreakDay);
-        localStorage.setItem('count', this.count.toString());
+    setStreakForCurrentAddiction() {
+      if (this.streakDays !== null && this.streakDays >= 0) {
+        this.setStreakDay(this.streakDays);
       }
-      this.closeSetStreakModal();
     },
-    openResetStreakModal(addiction) {
-      this.showResetStreakModal[addiction] = true;
+    setStreakDay(addiction ) {
+      if (addiction && this.streakDays) {
+        let selectedAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
+        const index = selectedAddictions.findIndex(item => item.addiction === addiction);
+        
+        if (index !== -1) {
+          const today = new Date();
+          const newDateCreated = new Date(today.getTime() - this.streakDays * 24 * 60 * 60 * 1000);
+          console.log(newDateCreated)
+          const confirmMessage = `Are you sure you want to set the streak for ${addiction} to ${this.streakDays} days?`;
+          if (confirm(confirmMessage)) {
+            selectedAddictions[index].dateCreated = newDateCreated.toISOString();
+            localStorage.setItem('selectedAddictions', JSON.stringify(selectedAddictions));
+            this.loadSelectedAddiction(); // Refresh the displayed addictions
+          }
+          
+          this.closeCountControls(addiction);
+          this.inputStreakVisible[addiction] = false;
+        }
+      }
+      this.streakDays = null; // Reset the streak days input
+    },  
+    confirmResetStreak(addiction) {
+      if (confirm(`Are you sure you want to reset the streak for ${addiction}?`)) {
+        let selectedAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
+        const index = selectedAddictions.findIndex(item => item.addiction === addiction);
+        if (index !== -1) {
+          selectedAddictions[index].dateCreated = new Date().toISOString();
+          localStorage.setItem('selectedAddictions', JSON.stringify(selectedAddictions));
+          this.loadSelectedAddiction(); // Refresh the displayed addictions
+        }
+        this.showCountControls[addiction] = false
+      }
     },
     closeResetStreakModal(addiction) {
       this.showResetStreakModal[addiction] = false;
-    },
-    confirmResetStreak() {
-      this.resetCount();
-      this.closeResetStreakModal();
+    }, 
+    openDeleteAddictionModal(addiction) {
+      if (confirm(`Are you sure you want to delete the ${addiction} addiction?`)) {
+        let selectedAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
+        selectedAddictions = selectedAddictions.filter(item => item.addiction !== addiction);
+        localStorage.setItem('selectedAddictions', JSON.stringify(selectedAddictions));
+
+        if (selectedAddictions.length === 0) {
+          localStorage.removeItem('hasSelectedAddiction');
+          this.hasSelectedAddiction = false;
+        }
+
+        this.showCountControls[addiction] = false;
+        
+        // Reload the selected addictions
+        this.loadSelectedAddiction();
+      }
     },
     goToSelectionComponent() {
       this.hasSelectedAddiction = false;
@@ -463,6 +570,7 @@ export default {
   width: 40px;
   height: 40px;
   display: flex;
+
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -493,12 +601,11 @@ export default {
 
 .addiction-tag {
   user-select: none;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease;
   position: relative;
  }
 
 .addiction-tag:hover {
-  transform: translateY(-2px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -527,4 +634,171 @@ export default {
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 10000; /* Even higher z-index for the modal content */
 }
+.reset-button, .set-streak-button {
+  background-color: #BDFCC9; /* Pastel green */
+  color: #333; /* Dark text for contrast */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 8px; /* Add some space between buttons */
+}
+
+.reset-button:hover, .set-streak-button:hover {
+  background-color: #A2F0B0; /* Slightly darker pastel green on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reset-button:active, .set-streak-button:active {
+  background-color: #8AE49A; /* Even darker when clicked */
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.delete-button {
+  background-color: #FFB3BA; /* Pastel red */
+  color: #333; /* Dark text for contrast */
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.delete-button:hover {
+  background-color: #FF9AA2; /* Slightly darker pastel red on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.delete-button:active {
+  background-color: #FF8389; /* Even darker when clicked */
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+
+.set-streak-container {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+
+.streak-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 8px;
+  font-size: 14px;
+}
+
+.set-streak-button {
+  background-color: #BDFCC9;
+  color: #333;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.set-streak-button:hover {
+  background-color: #A2F0B0;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.set-streak-button:active {
+  background-color: #8AE49A;
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.set-streak-button:disabled {
+  background-color: #E0E0E0;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancel-streak-button,
+.set-streak-button-validate {
+  background-color: #FFB3BA;
+  color: #333;
+  border: none;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  margin-left: 8px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cancel-streak-button:hover,
+.set-streak-button-validate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cancel-streak-button:active,
+.set-streak-button-validate:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.cancel-streak-button:hover {
+  background-color: #FF99A3;
+}
+
+.cancel-streak-button:active {
+  background-color: #FF8090;
+}
+
+.set-streak-button-validate {
+  background-color: #A2F0B0;
+}
+
+.set-streak-button-validate:hover {
+  background-color: #8AE49A;
+}
+
+.set-streak-button-validate:active {
+  background-color: #72D882;
+}
+
+.set-streak-button-validate:disabled {
+  background-color: #E0E0E0;
+  color: #999;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.cancel-streak-button svg,
+.set-streak-button-validate svg {
+  width: 14px;
+  height: 14px;
+}
+
+.streak-input {
+  flex: 1;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-right: 8px;
+  font-size: 14px;
+  height: 40px;
+  box-sizing: border-box;
+}
+
 </style>
