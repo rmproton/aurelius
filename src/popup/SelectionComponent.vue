@@ -1,6 +1,6 @@
 <template>
   <div class="starting-component" :class="currentTheme">
-    <button v-if="storedAddictions && storedAddictions.length > 0" @click="goBackToPopup" class="back-arrow" :class="currentTheme">
+    <button v-if="storedAddictions && storedAddictions.length > 0 && selectedItems.length === 0" @click="goBackToPopup" class="back-arrow" :class="currentTheme">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" :stroke="currentTheme === 'dark-theme' ? '#ffffff' : '#000000'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <line x1="19" y1="12" x2="5" y2="12"></line>
         <polyline points="12 19 5 12 12 5"></polyline>
@@ -131,7 +131,6 @@ export default {
         const existingAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
         const newAddictions = this.selectedItems.map((item, index) => ({
           addiction: item.name,
-          days: 1,
           addictionColor: item.color,
           position: index,
           dateCreated: new Date().toISOString()

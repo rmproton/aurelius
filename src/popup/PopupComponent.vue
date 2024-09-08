@@ -27,8 +27,8 @@
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-           <span style="font-size: 0.9rem;">  {{ Math.floor((new Date() - new Date(addiction.dateCreated)) / (1000 * 60 * 60 * 24)) }}
-            {{ Math.floor((new Date() - new Date(addiction.dateCreated)) / (1000 * 60 * 60 * 24)) === 1 ? 'day' : 'days' }} </span>
+           <span style="font-size: 0.9rem;">                         {{ formatDuration(new Date() - new Date(addiction.dateCreated)) }}
+          </span>
           </div>
 
           <button @click.stop="toggleCountControls(addiction.addiction)" class="count-button" :aria-expanded="showCountControls[addiction.addiction]" :aria-controls="`count-controls-${addiction.addiction}`">
@@ -41,7 +41,7 @@
               </div>
             </template>
             <template v-else>
-              <span class="ellipsis" :style="{ color: currentTheme === 'light-theme' ? '#ffffff' : '#ffffff', userSelect: 'none' }">...</span>
+              <div class="ellipsis" :style="{ color: currentTheme === 'light-theme' ? '#ffffff' : '#ffffff', userSelect: 'none', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '16px' }">...</div>
             </template>
           </button>
         </div>
@@ -102,9 +102,9 @@
 
                 
                 <div class="modal-buttons">
-                  <button @click="openResetStreakModal(addiction.addiction)" class="reset-button">Restart streak</button>
-                  <button @click="showInputStreak(addiction.addiction)" class="set-streak-button">Set streak day</button>
-                  <button @click="openDeleteAddictionModal(addiction.addiction)" class="delete-button">Delete addiction</button>
+                  <button @click="openResetStreakModal(addiction.addiction)" class="reset-button" style="font-family: 'Poppins', sans-serif;">Restart streak</button>
+                  <button @click="showInputStreak(addiction.addiction)" class="set-streak-button" style="font-family: 'Poppins', sans-serif;">Set streak day</button>
+                  <button @click="openDeleteAddictionModal(addiction.addiction)" class="delete-button" style="font-family: 'Poppins', sans-serif;">Delete addiction</button>
                 </div>
               </div>
             </div>
@@ -131,11 +131,11 @@
     </div>
   
  
-      <div class="quote-container"    >
-          <div class="quote-bubble" data-aos="fade-bottom" data-aos-duration="800"      data-aos-easing="linear"   >
+      <div class="quote-container"     data-aos="fade-bottom" data-aos-duration="800"      data-aos-easing="linear"  >
+          <div class="quote-bubble"  >
             <p class="quote-text"> {{ quoteText }} </p>
           </div>
-          <p class="quote-author" data-aos="fade-left" data-aos-duration="800"      data-aos-easing="linear"  >- {{ quoteAuthor }}</p>
+          <p class="quote-author"  >- {{ quoteAuthor }}</p>
       </div>
      
     
@@ -197,6 +197,7 @@ export default {
       streakDays: undefined,
       inputStreakVisible: [],
       count: 0,
+      browserLocale: navigator.language || navigator.userLanguage,
       showCountControls: [],
       showCount: false,
       lastOpenedDate: null,
@@ -223,12 +224,13 @@ export default {
   mounted(){
     AOS.init();
     this.fetchVersion(); 
+    this.showNotification()
   },
   created() {
     this.checkJourneyStarted();
     this.hasSelectedAddictionOnce()
     if (this.hasStartedJourney && this.hasSelectedAddiction) {
-      this.loadCount();
+    
       this.setDailyQuote()
       this.checkLastOpened();
       this.loadTheme();
@@ -264,7 +266,6 @@ export default {
       this.hasSelectedAddiction = localStorage.getItem("hasSelectedAddiction")
       this.loadSelectedAddiction()
       this.setDailyQuote();
-      this.loadCount();
       this.checkLastOpened();
       this.loadTheme();
       setTimeout(() => {
@@ -359,55 +360,38 @@ export default {
       this.draggedAddiction = null;
     },
     setDailyQuote() {
-      const today = new Date().toISOString().split('T')[0];
-      const storedDate = localStorage.getItem('quoteDate');
-      const storedQuoteText = localStorage.getItem('dailyQuoteText');
-      const storedQuoteAuthor = localStorage.getItem('dailyQuoteAuthor');
-
-      if (storedDate === today && storedQuoteText && storedQuoteAuthor) {
-        this.quoteText = storedQuoteText;
-        this.quoteAuthor = storedQuoteAuthor;
-      } else {
-        const todayQuotes = quotes.filter(quote => quote.date && quote.date.startsWith(today));
-        let selectedQuote;
-        
-        if (todayQuotes.length > 0) {
-          selectedQuote = todayQuotes[Math.floor(Math.random() * todayQuotes.length)];
-        } else {
-          selectedQuote = quotes[Math.floor(Math.random() * quotes.length)];
-        }
-
-        this.quoteText = selectedQuote.quote;
-        this.quoteAuthor = selectedQuote.author;
-        localStorage.setItem('quoteDate', today);
+      const today = new Date();
+    
+      
+      const todayString = today.toLocaleDateString().split('T')[0];
+      const todayQuote = quotes.find(quote => new Date(quote.date).toLocaleDateString() === todayString);
+      console.log("quote", todayQuote, todayString)
+      if (todayQuote) {
+        this.quoteText = todayQuote.quote;
+        this.quoteAuthor = todayQuote.author;
+        localStorage.setItem('quoteDate', todayString);
         localStorage.setItem('dailyQuoteText', this.quoteText);
         localStorage.setItem('dailyQuoteAuthor', this.quoteAuthor);
         if (this.hasSelectedAddiction) {
           this.incrementCount();
         }
+      } else {
+        console.log('No quote found for today');
+        // Optionally, you could set a default quote or clear the existing one
+        // this.quoteText = 'No quote available for today';
+        // this.quoteAuthor = '';
       }
     },
     formatDuration(duration) {
       const days = Math.floor(duration / (1000 * 60 * 60 * 24));
-      const months = Math.floor(days / 30);
-      const remainingDays = days % 30;
- 
+    
       let formattedDuration = '';
-      if (months > 0 && remainingDays > 0) {
-        formattedDuration = `${months}m ${remainingDays}d`;
-      } else if (months > 0) {
-        formattedDuration = `${months}m`;
-      } else {
-        formattedDuration = `${days}d`;
-      }
+    
+  
+        formattedDuration = `${days} d`;
+ 
   
       return formattedDuration.trim();
-    },
-    loadCount() {
-      if (this.hasSelectedAddiction) {
-        const storedCount = localStorage.getItem('count');
-        this.count = storedCount ? parseInt(storedCount) : 0;
-      }
     },
     incrementCount() {
       if (this.hasSelectedAddiction) {
@@ -450,9 +434,11 @@ export default {
           if (permission === 'granted') {
             const motivationIndex = this.count % this.motivations.length;
             const motivation = this.motivations[motivationIndex];
+            const selectedAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
+            const addictionList = selectedAddictions.map(addiction => `${addiction.addiction} - ${this.formatDuration(new Date().toLocaleDateString() - new Date(addiction.dateCreated))}`).join('\n');
             new Notification('Aurelius - Fight the urge', {
-              body: `Day ${this.count}, \nDon't forget to check today's quote! \n ${motivation}`,
-              icon: '/icons/icon48.png'
+              body: `${motivation} \nYou're fighting against: \n${addictionList}`,
+              icon: 'assets/icons/favicon-32x32.png'
             });
           }  
         });
@@ -497,7 +483,7 @@ export default {
         const index = selectedAddictions.findIndex(item => item.addiction === addiction);
         
         if (index !== -1) {
-          const today = new Date();
+          const today = new Date() 
           const newDateCreated = new Date(today.getTime() - this.streakDays * 24 * 60 * 60 * 1000);
           console.log(newDateCreated)
           const confirmMessage = `Are you sure you want to set the streak for ${addiction} to ${this.streakDays} days?`;
@@ -643,6 +629,7 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   margin-bottom: 8px; /* Add some space between buttons */
+  font-family: 'Poppins', sans-serif; /* Added Poppins font family */
 }
 
 .reset-button:hover, .set-streak-button:hover {
@@ -665,6 +652,7 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.3s ease;
+  font-family: 'Poppins', sans-serif; /* Added Poppins font family */
 }
 
 .delete-button:hover {
@@ -704,6 +692,7 @@ export default {
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 14px;
+  font-family: 'Poppins', sans-serif; /* Added Poppins font family */
 }
 
 .set-streak-button:hover {
@@ -742,6 +731,7 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  font-family: 'Poppins', sans-serif; /* Added Poppins font family */
 }
 
 .cancel-streak-button:hover,
