@@ -148,6 +148,10 @@ export default {
         
         // Set hasSelectedAddiction to true if at least one addiction is selected
         localStorage.setItem('hasSelectedAddiction', 'true');
+
+         const today = new Date().toLocaleDateString()
+        
+        localStorage.setItem('lastOpenedDate', today);
         
         this.$emit('addiction-selected');
       }

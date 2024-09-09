@@ -22,12 +22,12 @@
           <span style="font-family: 'Poppins', sans-serif;"> {{ addiction.addiction }}</span>
         </div>
         <div style="display: flex; flex-direction: row; justify-content: flex-end; align-items: center; width: 100%; ">
-          <div v-if="showCount" class="count-text" aria-live="polite" style="display: flex; align-items: center; font-family: 'Poppins', sans-serif;">
+          <div class="count-text" aria-live="polite" style="display: flex; align-items: center; font-family: 'Poppins', sans-serif;">
             <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-           <span style="font-size: 0.9rem;">                         {{ formatDuration(new Date() - new Date(addiction.dateCreated)) }}
+           <span style="font-size: 0.9rem;">    {{ formatDuration(new Date() - new Date(addiction.dateCreated)) }}
           </span>
           </div>
 
@@ -49,6 +49,13 @@
             <div v-if="showCountControls[addiction.addiction]" class="modal-overlay" @click.self="closeCountControls(addiction.addiction)" aria-modal="true" role="dialog" tabindex="0" style="z-index: 999999;">
               
               <div class="modal">
+
+                <div style="position: absolute; top: 0.5rem; right: 0.7rem; z-index: 10; cursor: pointer;">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="close-icon" @click="closeCountControls(addiction.addiction)">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                  </svg>
+                </div>
            
                 <div class="addiction-tag" 
                     :style="{ backgroundColor: addiction.addictionColor }"
@@ -99,6 +106,7 @@
                     </button>
                   </div>
                 </transition>
+                <div class="quote-bubble" :style="{ marginTop: '1rem', color: currentTheme === 'light-theme' ? 'black' : 'inherit' }">{{ motivations[Math.floor(Math.random() * motivations.length)] }}</div>
 
                 
                 <div class="modal-buttons">
@@ -141,6 +149,9 @@
     
     </div>
    
+    <div class="version" :class="currentTheme"  >
+      v{{ version }}
+    </div>
     <div class="support-icon" @click="goToOptions" @keydown.space.prevent="goToOptions" title="Online Support Guides" aria-label="Online Support Guides" tabindex="0">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
@@ -224,8 +235,7 @@ export default {
   mounted(){
     AOS.init();
     this.fetchVersion(); 
-    this.showNotification()
-  },
+   },
   created() {
     this.checkJourneyStarted();
     this.hasSelectedAddictionOnce()
@@ -235,9 +245,7 @@ export default {
       this.checkLastOpened();
       this.loadTheme();
       this.loadSelectedAddiction();
-      setTimeout(() => {
-        this.showCount = true;
-      }, 100);
+    
     }
   },
   methods: {
@@ -266,7 +274,6 @@ export default {
       this.hasSelectedAddiction = localStorage.getItem("hasSelectedAddiction")
       this.loadSelectedAddiction()
       this.setDailyQuote();
-      this.checkLastOpened();
       this.loadTheme();
       setTimeout(() => {
         this.showCount = true;
@@ -389,9 +396,9 @@ export default {
     
   
         formattedDuration = `${days} d`;
- 
+        console.log(formattedDuration)
   
-      return formattedDuration.trim();
+      return formattedDuration
     },
     incrementCount() {
       if (this.hasSelectedAddiction) {
@@ -418,10 +425,10 @@ export default {
     },
     checkLastOpened() {
       if (this.hasSelectedAddiction) {
-        const today = new Date().toISOString().split('T')[0];
-        this.lastOpenedDate = localStorage.getItem('lastOpenedDate');
+        const today = new Date().toLocaleDateString()
+        const lastOpened = localStorage.getItem('lastOpenedDate');
         
-        if (this.lastOpenedDate !== today) {
+        if (lastOpened !== today) {
           this.showNotification();
         }
         
@@ -435,7 +442,7 @@ export default {
             const motivationIndex = this.count % this.motivations.length;
             const motivation = this.motivations[motivationIndex];
             const selectedAddictions = JSON.parse(localStorage.getItem('selectedAddictions') || '[]');
-            const addictionList = selectedAddictions.map(addiction => `${addiction.addiction} - ${this.formatDuration(new Date().toLocaleDateString() - new Date(addiction.dateCreated))}`).join('\n');
+            const addictionList = selectedAddictions.map(addiction => `${addiction.addiction} - ${this.formatDuration(new Date() - new Date(addiction.dateCreated))}`).join('\n');
             new Notification('Aurelius - Fight the urge', {
               body: `${motivation} \nYou're fighting against: \n${addictionList}`,
               icon: 'assets/icons/favicon-32x32.png'
@@ -617,6 +624,7 @@ export default {
 
 .modal {
    border-radius: 8px;
+   position: relative;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 10000; /* Even higher z-index for the modal content */
 }
@@ -790,5 +798,17 @@ export default {
   height: 40px;
   box-sizing: border-box;
 }
+
+.version {
+  position: absolute;
+  opacity: 0.5;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: pointer;
+}
+
+
+
 
 </style>

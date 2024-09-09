@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build",
+        "build": "vue-cli-service build && powershell \"Compress-Archive -Path dist/* -DestinationPath build_${require('./package.json').version}.zip\"",
         "lint": "vue-cli-service lint",
         "test": "vue-cli-service test:unit tests/components/"
     },
@@ -26,7 +26,7 @@
         "@vue/test-utils": "^2.0.0-0",
         "eslint": "^7.32.0",
         "eslint-plugin-vue": "^8.0.3"
-    },
+     },
     "eslintConfig": {
         "root": true,
         "env": {
