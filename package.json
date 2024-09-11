@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
-        "build": "vue-cli-service build && powershell \"Compress-Archive -Path dist/* -DestinationPath build_${require('./package.json').version}.zip\"",
+        "build": "vue-cli-service build && powershell \"Remove-Item -Path build_${require('./package.json').version}.zip -Force; Compress-Archive -Path dist/* -DestinationPath build_${require('./package.json').version}.zip\"",
         "lint": "vue-cli-service lint",
         "test": "vue-cli-service test:unit tests/components/"
     },
