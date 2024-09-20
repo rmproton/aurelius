@@ -104,3 +104,21 @@ Implementing a router view would provide several benefits:
 5. More standardized Vue.js application structure
 
 Refactoring the application to use a router view is a priority for future development. This will involve restructuring the application's component hierarchy, implementing vue-router, and updating the navigation logic throughout the app. While this refactoring process will require significant effort, it will greatly improve the app's maintainability and scalability in the long run.
+
+## Quotes
+
+## Quotes
+
+Aurelius features inspirational quotes to motivate users on their recovery journey. These quotes are updated every six months to provide fresh content and ongoing inspiration.
+
+For convenience and to maintain the extension's commitment to privacy, these quotes are provided through a local JSON file rather than making requests to an external API. This approach offers several benefits:
+
+1. **Privacy**: No external API calls are made, ensuring user privacy and data protection.
+2. **Offline Functionality**: Quotes are available even when the user is offline.
+3. **Performance**: Faster access to quotes as they're stored locally.
+4. **Reduced Dependencies**: No reliance on external services for this feature.
+
+The quotes are stored in a `quotes.json` file within the extension's codebase. This file is updated with the extension releases, ensuring users receive new content periodically without compromising their privacy or the extension's offline capabilities.
+
+Developers contributing to Aurelius can update the `quotes.json` file during the bi-annual content refresh, providing users with a continually evolving source of motivation and inspiration.
+
