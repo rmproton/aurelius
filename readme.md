@@ -89,3 +89,18 @@ Aurelius is an ongoing development project in its early phase. We welcome contri
 - **Contribute to Discussions**: Join ongoing discussions about the project's direction and future features.
 
 Your contributions, whether big or small, are valuable to the growth and success of Aurelius. Let's work together to create a powerful tool for recovery support!
+
+## Technical Debt
+
+As Aurelius started with fewer features and gradually expanded, it has accumulated some technical debt. One significant area of technical debt is the lack of a router view in the application architecture.
+
+Initially, the app was designed with a simpler structure, using conditional rendering to switch between different components (StartingComponent, SelectionComponent, PopupComponent, etc.). While this approach worked for the initial scope of the project, it has led to a less scalable and maintainable codebase as more features were added.
+
+Implementing a router view would provide several benefits:
+1. Improved navigation and state management
+2. Better URL-based navigation, allowing for bookmarking and sharing specific views
+3. Cleaner separation of concerns between components
+4. Easier addition of new features and views in the future
+5. More standardized Vue.js application structure
+
+Refactoring the application to use a router view is a priority for future development. This will involve restructuring the application's component hierarchy, implementing vue-router, and updating the navigation logic throughout the app. While this refactoring process will require significant effort, it will greatly improve the app's maintainability and scalability in the long run.
